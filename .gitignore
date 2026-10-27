@@ -1,0 +1,57 @@
+# Environment
+.env
+.env.local
+.env.production
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+.npm
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Project specific
+uploads/
+reports/generated/
+*.log
+synopsis_text.txt
+
+# ML Models (downloaded at runtime)
+models/
+*.bin
+*.onnx
+
+# Database
+*.sql.bak
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated reports / audit PDFs in project root
+ResearchMind_AI_Project_Audit.pdf
