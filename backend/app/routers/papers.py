@@ -79,7 +79,7 @@ async def upload_paper(
 
     # Create paper record
     paper = Paper(
-        project_id=uuid.UUID(project_id),
+        project_id=str(project_id),
         title=file.filename.replace('.pdf', '').replace('_', ' ').replace('-', ' '),
         filename=file.filename,
         filepath=filepath,
@@ -296,7 +296,7 @@ async def seed_sample_papers(
         file_size = os.path.getsize(filepath)
 
         paper = Paper(
-            project_id=uuid.UUID(project_id),
+            project_id=str(project_id),
             title=s["title"],
             authors=s["authors"],
             year=s["year"],

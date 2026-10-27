@@ -148,7 +148,7 @@ async def start_analysis(
 
     # Create analysis record
     analysis = Analysis(
-        project_id=uuid.UUID(project_id),
+        project_id=str(project_id),
         analysis_type=request.analysis_type,
         status=AnalysisStatus.QUEUED.value,
         status_message="Analysis queued",
@@ -158,7 +158,7 @@ async def start_analysis(
     await db.refresh(analysis)
 
     # Run in background
-    background_tasks.add_task(_run_full_analysis, uuid.UUID(project_id), analysis.id)
+    background_tasks.add_task(_run_full_analysis, str(project_id), analysis.id)
 
     return analysis
 

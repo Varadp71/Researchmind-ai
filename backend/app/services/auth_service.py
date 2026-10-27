@@ -24,7 +24,7 @@ settings = get_settings()
 # auto_error=False allows optional auth for frictionless MSE demonstration
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
-DEMO_USER_ID = uuid.UUID("00000000-0000-0000-0000-000000000001")
+DEMO_USER_ID = "00000000-0000-0000-0000-000000000001"
 SALT = b"researchmind_secure_salt_2026"
 
 
@@ -51,11 +51,11 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 
 async def get_or_create_demo_user(db: AsyncSession) -> User:
     """Ensure a default Demo Researcher user exists for frictionless testing/demo."""
-    result = await db.execute(select(User).where(User.id == DEMO_USER_ID))
+    result = await db.execute(select(User).where(User.id == str(DEMO_USER_ID)))
     user = result.scalar_one_or_none()
     if user is None:
         user = User(
-            id=DEMO_USER_ID,
+            id=str(DEMO_USER_ID),
             email="researcher@researchmind.ai",
             name="Demo Researcher",
             password_hash=hash_password("demo1234"),
@@ -83,7 +83,7 @@ async def get_current_user(
         user_id_str: str | None = payload.get("sub")
         if not user_id_str:
             return await get_or_create_demo_user(db)
-        user_id = uuid.UUID(user_id_str)
+        user_id = str(uuid.UUID(user_id_str))  # normalise to plain string for SQLite
         result = await db.execute(select(User).where(User.id == user_id))
         user = result.scalar_one_or_none()
         if user and user.is_active:
