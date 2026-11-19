@@ -297,11 +297,12 @@ async def download_report(
 
     try:
         pdf_bytes = await generate_pdf_report(project.id, project.name, db)
+        safe_name = "".join(c for c in project.name if c.isalnum() or c in (' ', '_', '-')).strip() or "Project"
         return StreamingResponse(
             io.BytesIO(pdf_bytes),
             media_type="application/pdf",
             headers={
-                "Content-Disposition": f'attachment; filename="ResearchMind_Report_{project.name}.pdf"'
+                "Content-Disposition": f'attachment; filename="ResearchMind_Report_{safe_name}.pdf"'
             },
         )
     except Exception as e:

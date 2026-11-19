@@ -96,7 +96,8 @@ async def get_current_user(
 
 
 async def authenticate_user(db: AsyncSession, email: str, password: str) -> User | None:
-    result = await db.execute(select(User).where(User.email == email))
+    # Allow matching by either email or user name (username)
+    result = await db.execute(select(User).where((User.email == email) | (User.name == email)))
     user = result.scalar_one_or_none()
     if user is None:
         return None

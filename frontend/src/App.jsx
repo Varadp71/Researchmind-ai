@@ -2,12 +2,34 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import ProjectList from './components/ProjectList';
 import ProjectWorkspace from './components/ProjectWorkspace';
-import { getProjects } from './api';
+import LoginPage from './components/LoginPage';
+import { getProjects, getCurrentUser } from './api';
 
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [authChecking, setAuthChecking] = useState(true);
   const [projects, setProjects] = useState([]);
   const [activeProject, setActiveProject] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Check existing session on load
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const currentUser = await getCurrentUser();
+          setUser(currentUser);
+        } catch (err) {
+          console.warn('Session token invalid or expired:', err);
+          localStorage.removeItem('token');
+          setUser(null);
+        }
+      }
+      setAuthChecking(false);
+    };
+    checkAuth();
+  }, []);
 
   const fetchProjects = async () => {
     try {
@@ -29,12 +51,43 @@ export default function App() {
   };
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    if (user) {
+      fetchProjects();
+    }
+  }, [user]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    setActiveProject(null);
+    setProjects([]);
+  };
+
+  if (authChecking) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'var(--bg-deepest)',
+        color: 'var(--text-dim)',
+        fontSize: '0.9rem'
+      }}>
+        Loading ResearchMind AI...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage onLoginSuccess={(loggedInUser) => setUser(loggedInUser)} />;
+  }
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Navbar 
+      <Navbar
+        user={user}
+        onLogout={handleLogout}
         activeProject={activeProject}
         onNavigateHome={() => setActiveProject(null)}
         onNewProject={() => {
@@ -44,15 +97,16 @@ export default function App() {
 
       <main style={{ flex: 1 }}>
         {activeProject ? (
-          <ProjectWorkspace 
+          <ProjectWorkspace
             project={activeProject}
             onBack={() => {
               setActiveProject(null);
               fetchProjects();
             }}
           />
+
         ) : (
-          <ProjectList 
+          <ProjectList
             projects={projects}
             onSelectProject={(proj) => setActiveProject(proj)}
             onRefresh={fetchProjects}

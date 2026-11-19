@@ -13,12 +13,17 @@ class ApiError extends Error {
   }
 }
 
+export function getAuthHeader() {
+  const token = localStorage.getItem('token');
+  return token ? `Bearer ${token}` : 'Bearer demo-token';
+}
+
 async function request(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
   const headers = { ...options.headers };
 
   if (!headers['Authorization']) {
-    headers['Authorization'] = 'Bearer demo-token';
+    headers['Authorization'] = getAuthHeader();
   }
 
   try {
@@ -88,7 +93,7 @@ export async function uploadPaper(projectId, file) {
 
   const res = await fetch(`${API_BASE}/papers/${projectId}/upload`, {
     method: 'POST',
-    headers: { 'Authorization': 'Bearer demo-token' },
+    headers: { 'Authorization': getAuthHeader() },
     body: formData,
   });
 
@@ -130,6 +135,47 @@ export async function getAnalysisResults(projectId) {
 
 export async function getDashboard(projectId) {
   return request(`/analysis/${projectId}/dashboard`);
+}
+
+// ──────────── Auth ────────────
+export async function loginUser(email, password) {
+  return request('/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export async function getCurrentUser() {
+  return request('/auth/me');
+}
+
+// ──────────── Reports / Download ────────────
+export async function downloadReport(projectId, projectName = 'Report') {
+  const url = `${API_BASE}/analysis/${projectId}/report`;
+  const response = await fetch(url, {
+    headers: { 'Authorization': getAuthHeader() },
+  });
+
+  if (!response.ok) {
+    let detail = 'Failed to generate and download report';
+    try {
+      const err = await response.json();
+      detail = err.detail || detail;
+    } catch (_) {}
+    throw new ApiError(detail, response.status);
+  }
+
+  const blob = await response.blob();
+  const blobUrl = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  const safeName = (projectName || 'ResearchMind_Report').replace(/[^a-zA-Z0-9_-]/g, '_');
+  a.download = `ResearchMind_Report_${safeName}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(blobUrl);
+  document.body.removeChild(a);
 }
 
 export { ApiError };

@@ -3,9 +3,23 @@ import {
   Brain, Sparkles, Layers, Compass, TrendingUp, AlertCircle, 
   CheckCircle2, ArrowRight, Share2, Download, Search, Info, HelpCircle
 } from 'lucide-react';
+import { downloadReport } from '../api';
 
 export default function ResultsDashboard({ dashboard, onRunAnalysis, analyzing }) {
   const [selectedPair, setSelectedPair] = useState(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadReport = async () => {
+    if (!dashboard || !dashboard.project_id) return;
+    try {
+      setDownloading(true);
+      await downloadReport(dashboard.project_id, dashboard.project_name);
+    } catch (err) {
+      alert(`Download failed: ${err.message}`);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   if (!dashboard || !dashboard.similarity_matrix) {
     return (
@@ -87,6 +101,42 @@ export default function ResultsDashboard({ dashboard, onRunAnalysis, analyzing }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      {/* Research Intelligence Report Header & Download Button */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        padding: '1.25rem 1.75rem',
+        background: '#FFFFFF',
+        borderRadius: 'var(--radius-md)',
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+            <Sparkles size={18} color="#2563EB" />
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+              Research Intelligence Report
+            </h3>
+          </div>
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-dim)', margin: 0 }}>
+            Comprehensive analysis synthesizing paper similarity, extracted research domains, and detected methodology gaps.
+          </p>
+        </div>
+
+        <button
+          className="btn btn-primary"
+          onClick={handleDownloadReport}
+          disabled={downloading}
+          style={{ gap: '0.5rem', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.25)' }}
+        >
+          <Download size={16} />
+          <span>{downloading ? 'Generating PDF...' : 'Download Report (PDF)'}</span>
+        </button>
+      </div>
+
       {/* Top Banner & Quick Metrics */}
       <div style={{
         display: 'grid',

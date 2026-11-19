@@ -1,7 +1,7 @@
 import React from 'react';
-import { Brain, PlusCircle, ChevronRight, Sparkles } from 'lucide-react';
+import { Brain, PlusCircle, ChevronRight, Sparkles, LogOut } from 'lucide-react';
 
-export default function Navbar({ activeProject, onNavigateHome, onNewProject }) {
+export default function Navbar({ activeProject, onNavigateHome, onNewProject, user, onLogout }) {
   return (
     <header style={{
       background: '#FFFFFF',
@@ -95,6 +95,51 @@ export default function Navbar({ activeProject, onNavigateHome, onNewProject }) 
             <PlusCircle size={15} />
             <span>New Project</span>
           </button>
+        )}
+
+        {user && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.65rem',
+            borderLeft: '1px solid var(--border)',
+            paddingLeft: '0.85rem'
+          }}>
+            <div style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              background: '#EFF6FF',
+              color: '#2563EB',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 700,
+              fontSize: '0.75rem',
+              border: '1px solid #BFDBFE'
+            }}>
+              {user.name ? user.name[0].toUpperCase() : 'R'}
+            </div>
+            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+              {user.name || user.email}
+            </span>
+            {onLogout && (
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={onLogout}
+                title="Sign out"
+                style={{
+                  color: 'var(--text-dim)',
+                  padding: '0.25rem 0.5rem',
+                  fontSize: '0.78rem',
+                  gap: '0.3rem'
+                }}
+              >
+                <LogOut size={14} />
+                <span>Logout</span>
+              </button>
+            )}
+          </div>
         )}
       </div>
     </header>
